@@ -1,1 +1,68 @@
 
+#Data Collection 
+# Required Libraries
+library(openssl) # For cryptographic functions
+library(httr)    # For secure connection (TLS)
+
+# Initialize empty dataset and error log
+OSN_dataset <- data.frame()
+ErrorLog <- data.frame()
+
+# Generate Public/Private Key pairs for demonstration
+key_pair <- rsa_keygen() # This should be done for each edge_device and Central Server
+
+# Main Loop
+for(edge_device in edge_devices) {
+  tryCatch({
+    # Securely connect to edge_device using TLS
+    # Assuming secure_connect() is a function that establishes a TLS connection
+    secure_connect(edge_device)
+    
+    # Authenticate edge_device using its Public Key (Digital Signature)
+    # Assuming authenticate_device() is a function that performs authentication
+    authenticate_device(edge_device, key_pair$pub)
+    
+    # Authenticate using OAuth2 or similar protocol
+    # oauth2.0_token() can be used here
+    
+    # Collect specific network traffic data (e.g., user interactions, server logs)
+    collected_data <- collect_data(edge_device)
+    
+    # Encrypt collected data using Central Server's Public Key
+    encrypted_data <- encrypt_data(collected_data, key_pair$pub)
+    
+    # Generate a cryptographic hash (e.g., SHA-256) of the collected data
+    data_hash <- sha256(collected_data)
+    
+    # Sign the hash using edge_device's Private Key (Digital Signature)
+    signature <- sign_hash(data_hash, key_pair$priv)
+    
+    # Send encrypted data and signature to Central Server
+    # Assuming send_to_server() is a function that sends data to the server
+    send_to_server(encrypted_data, signature)
+    
+    # Central Server verifies signature using edge_device's Public Key
+    # Assuming verify_signature() is a function that verifies the signature
+    if(verify_signature(signature, data_hash, key_pair$pub)) {
+      # Decrypt data using Central Server's Private Key
+      decrypted_data <- decrypt_data(encrypted_data, key_pair$priv)
+      
+      # Append decrypted data to OSN_dataset
+      OSN_dataset <- rbind(OSN_dataset, decrypted_data)
+    }
+  }, error = function(e) {
+    # Log error to ErrorLog
+    ErrorLog <- rbind(ErrorLog, list(error_message = e$message, device = edge_device))
+    
+    # Retry up to 3 times or skip edge_device
+    # Implement retry logic here
+  })
+}
+
+# Store OSN_dataset in a secure, encrypted database
+# Assuming store_in_database() is a function that stores the data in a database
+store_in_database(OSN_dataset, ErrorLog)
+
+# Return OSN_dataset and ErrorLog
+list(OSN_dataset = OSN_dataset, ErrorLog = ErrorLog)
+
