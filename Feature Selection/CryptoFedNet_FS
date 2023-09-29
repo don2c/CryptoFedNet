@@ -1,0 +1,69 @@
+# Feature Selection
+# Required Libraries
+library(caret) # For RFE (Recursive Feature Elimination)
+library(doParallel) # For parallel processing
+
+# Constants
+THRESHOLD <- 70 # Replace with actual resource threshold
+
+# Placeholder function for checking resources
+CheckResources <- function(edge_device) {
+  # Implement logic to check resources
+  # Return as a numeric value
+  return(80)
+}
+
+# Placeholder function for RFE
+RFE <- function(data, model) {
+  # Implement logic for Recursive Feature Elimination
+  # Return selected features
+  return(selected_features)
+}
+
+# Placeholder function for aggregating features from all devices
+AggregateFeaturesFromAllDevices <- function() {
+  # Implement logic for aggregating features
+  # Return global selected features
+  return(global_selected_features)
+}
+
+# Main Procedure
+FederatedFeatureSelection <- function(Model) {
+  Global_selected_features <- NULL # Initialize empty set
+  
+  cl <- makeCluster(detectCores()) # Create a cluster for parallel processing
+  registerDoParallel(cl)
+  
+  foreach(edge_device = iter(edge_devices), .packages = c("caret")) %dopar% {
+    tryCatch({
+      # Check resources
+      resources <- CheckResources(edge_device)
+      
+      if(resources > THRESHOLD) {
+        # Perform RFE for feature selection
+        selected_features <- RFE(edge_device$data, Model)
+        
+        # Send selected_features to central server
+        # Assuming send_to_server() is a function that sends data to the central server
+        send_to_server(selected_features)
+      }
+    }, error = function(e) {
+      # Log error and skip edge_device
+      # Implement logging logic here
+    })
+  }
+  
+  stopCluster(cl) # Stop the cluster
+  
+  # Aggregate features from all devices
+  Global_selected_features <- AggregateFeaturesFromAllDevices()
+  
+  # Use version control to ensure consistency in the feature selection method
+  # Implement version control logic here
+  
+  return(Global_selected_features)
+}
+
+# Execute the procedure with a placeholder model
+Model <- "CryptoFedNet_Model" # Replace with the actual model
+Global_selected_features <- FederatedFeatureSelection(Model)
