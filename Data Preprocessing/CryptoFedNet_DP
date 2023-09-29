@@ -1,1 +1,80 @@
+#Data Preprocessing
+
+# Required Libraries
+library(dplyr) # For data manipulation
+
+# Constants
+CPU_THRESHOLD <- 70 # Replace with actual threshold
+MEM_THRESHOLD <- 4000 # Replace with actual threshold in MB
+
+# Placeholder function for checking resources
+CheckResources <- function(edge_device) {
+  # Implement logic to check CPU, memory, and storage
+  # Return as a list
+  return(list(cpu = 80, mem = 5000, storage = 50))
+}
+
+# Placeholder function for lightweight hash
+LightweightHash <- function(data) {
+  # Implement logic for lightweight hashing
+  return(digest::digest(data, algo = "sha256"))
+}
+
+# Placeholder function for adding Laplace noise
+LaplaceNoise <- function(epsilon) {
+  # Implement logic for Laplace noise
+  return(runif(1, 0, epsilon))
+}
+
+# Main Procedure
+FederatedPreprocess <- function() {
+  for(edge_device in edge_devices) {
+    resources <- CheckResources(edge_device)
+    cpu <- resources$cpu
+    mem <- resources$mem
+    
+    if(cpu > CPU_THRESHOLD && mem > MEM_THRESHOLD) {
+      tryCatch({
+        # Connect securely to edge_device
+        # Assuming secure_connect() is a function that establishes a secure connection
+        secure_connect(edge_device)
+        
+        # Lightweight hash of original data
+        data_hash <- LightweightHash(edge_device$data)
+        
+        # Normalize data
+        mu <- mean(edge_device$data)
+        sigma <- sd(edge_device$data)
+        edge_device$data <- (edge_device$data - mu) / sigma
+        
+        # Detect and remove outliers
+        k <- 1.5 # Threshold multiplier
+        outliers <- abs(edge_device$data - mu) > k * sigma
+        edge_device$data <- edge_device$data[!outliers]
+        
+        # Add Laplace noise for differential privacy
+        epsilon <- 0.1 # Privacy parameter
+        edge_device$data <- edge_device$data + LaplaceNoise(epsilon)
+        
+        # Lightweight hash of new data
+        new_data_hash <- LightweightHash(edge_device$data)
+        
+        if(data_hash != new_data_hash) {
+          cat("Data integrity compromised for", edge_device, "\n")
+        }
+      }, error = function(e) {
+        # Classify error and handle accordingly
+        # Implement retry or skip logic here
+      })
+    } else {
+      cat("Insufficient resources for", edge_device, "\n")
+    }
+  }
+  
+  # Send feedback metrics to central server
+  # Implement logic to send metrics
+}
+
+# Execute the procedure
+FederatedPreprocess()
 
