@@ -1,1 +1,94 @@
+#Model Training and Aggregation
+# Required Libraries
+library(doParallel) # For parallel processing
+
+# Constants
+THRESHOLD <- 70 # Replace with actual resource threshold
+
+# Placeholder function for checking resources
+CheckResources <- function(edge_device) {
+  # Implement logic to check resources
+  # Return as a numeric value
+  return(80)
+}
+
+# Placeholder function for training the model
+train <- function(M_g, D_d) {
+  # Implement logic for training the model
+  # Return the trained model
+  return(M_d_prime)
+}
+
+# Placeholder function for lightweight training
+LightweightTrain <- function(M_g, D_d) {
+  # Implement logic for lightweight training
+  # Return the trained model
+  return(M_d_prime)
+}
+
+# Placeholder function for weighted aggregation
+WeightedAggregate <- function(M) {
+  # Implement logic for weighted aggregation
+  # Return the aggregated model
+  return(M_g_prime)
+}
+
+# Main Procedure
+EnhancedFederatedTrainingAndAggregation <- function() {
+  blacklist <- vector("list") # Initialize empty blacklist
+  
+  cl <- makeCluster(detectCores()) # Create a cluster for parallel processing
+  registerDoParallel(cl)
+  
+  foreach(edge_device = iter(edge_devices), .packages = c("doParallel")) %dopar% {
+    if(!edge_device %in% blacklist) {
+      tryCatch({
+        # Fetch latest version of M_g
+        M_g <- fetch_latest_version() # Placeholder function
+        
+        # Check resources
+        resources <- CheckResources(edge_device)
+        
+        if(resources > THRESHOLD) {
+          # StratifiedSample or WeightData based on D_d
+          # Implement logic here
+          
+          # Train the model
+          M_d_prime <- train(M_g, edge_device$data[selected_features])
+        } else {
+          # Lightweight training
+          M_d_prime <- LightweightTrain(M_g, edge_device$data[selected_features])
+        }
+        
+        if(communication_frequency_condition_met) { # Placeholder condition
+          # Securely send M_d_prime and its signature to central server
+          # Assuming send_to_server() is a function that sends data to the central server
+          send_to_server(M_d_prime)
+          
+          # Verify signature
+          if(!VerifySignature(M_d_prime, edge_device)) { # Placeholder function
+            # Add edge_device to blacklist if repeated failures
+            blacklist <- c(blacklist, edge_device)
+          }
+        }
+      }, error = function(e) {
+        # Handle error (e.g., log, retry, or skip edge_device)
+        # Implement error handling logic here
+      })
+    }
+  }
+  
+  stopCluster(cl) # Stop the cluster
+  
+  # Batch process updates
+  # Implement logic here
+  
+  # Weighted aggregation
+  M_g_prime <- WeightedAggregate(M) # M is a placeholder for the set of all models
+  
+  return(M_g_prime)
+}
+
+# Execute the procedure
+M_g_prime <- EnhancedFederatedTrainingAndAggregation()
 
