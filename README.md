@@ -65,7 +65,7 @@ If you find this project useful for your research, please cite:
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Contact
-For any queries, please contact [Your Name](mailto:your.email@example.com).
+For any queries, please contact [We will update it after the paper is published](mailto:your.email@example.com).
 
 ---
 
